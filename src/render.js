@@ -5,12 +5,12 @@ const { Menu } = remote;
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const recorderTime = document.getElementById('recorderTime');
+
 let time;
 stopBtn.disabled = true;
 videoSelectBtn.onclick = e => getVideoSources();
 
 async function getVideoSources(){
-    console.log('click');
     const inputSources = await desktopCapturer.getSources({
         types: ['window','screen']
     });
@@ -46,7 +46,11 @@ async function selectSource(source){
 
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
+    
+
     videoElement.srcObject = stream;
+    videoElement.style.maxWidth = '800px';
+    videoElement.style.maxHeight = '600px';
     videoElement.play();
 
     const options = { mimeType: 'video/webm; codecs=vp9'};
@@ -58,7 +62,10 @@ async function selectSource(source){
 
 let interval;
 
+
+
 startBtn.onclick = e => {
+    let notification = new Notification('Gravando...');
   mediaRecorder.start();
   startBtn.innerText = 'Gravando...';
   startBtn.disabled = true;
@@ -72,6 +79,7 @@ startBtn.onclick = e => {
 
 
 stopBtn.onclick = e => {
+    let notification = new Notification('Gravação encerrada!');
   mediaRecorder.stop();
   startBtn.disabled = false;
   stopBtn.disabled = true;
@@ -80,9 +88,7 @@ stopBtn.onclick = e => {
   clearInterval(interval);
 };
 
-
 function handleDataAvailable(e){
-    console.log('video data available');
     recordedChunks.push(e.data);
 }
 
@@ -95,12 +101,11 @@ async function handleStop(e){
 
     const buffer = Buffer.from(await blob.arrayBuffer());
 
+    let data = Intl.DateTimeFormat( 'pt-BR', {day: 'numeric',month:'long',year:'numeric'}).format(Date.now());
     const { filePath } = await dialog.showSaveDialog({
         buttonLabel: 'Salvar video',
-        defaultPath: `video-${Date.now()}.webm`
+        defaultPath: `${data}.webm`
     });
 
-    console.log(filePath);
-
-    writeFile(filePath,buffer,() => console.log('video salvo'));
+    writeFile(filePath,buffer,() => alert('video salvo'));
 }
