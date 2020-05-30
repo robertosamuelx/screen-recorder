@@ -102,10 +102,17 @@ async function handleStop(e){
     const buffer = Buffer.from(await blob.arrayBuffer());
 
     let data = Intl.DateTimeFormat( 'pt-BR', {day: 'numeric',month:'long',year:'numeric'}).format(Date.now());
-    const { filePath } = await dialog.showSaveDialog({
+    let { filePath } = await dialog.showSaveDialog({
         buttonLabel: 'Salvar video',
         defaultPath: `${data}.webm`
     });
 
+    if(!filePath.includes('.webm')){
+        filePath = filePath + '.webm'
+    }
+
     writeFile(filePath,buffer,() => alert('video salvo'));
+
+    while(recordedChunks.length > 0)
+        recordedChunks.pop();
 }
